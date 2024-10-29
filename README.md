@@ -1,4 +1,4 @@
-# Intoduction 
+# Introduction 
 This repository contains code to compare the derivative-free, multi-objective 
 solvers `DFMO` and `Compromise.jl` on a set of nonlinearly constrained test problems 
 derived from `TESTMO`.
@@ -49,3 +49,9 @@ Beware, that subsequent execution of the scripts from the same REPL might clutte
 global workspace and lead to unexpected results.
 A possible workaround is to modify the scripts to use modules.
 Or `include` within a `let` scope.
+
+# Dev Environment
+
+In an attempt to declutter my global environment, I have tried out the devcontainer feature of VSCode.
+For various reasons, it did not work out for me, but I have kept the `.devcontainer` folder.
+Instead, I now rely on `flake.nix` to have a more isolated and reproducible environment.
