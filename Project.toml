@@ -1,0 +1,36 @@
+name = "MOBenchmarks"
+uuid = "16339a85-33f3-4d76-830a-954e4894453b"
+authors = ["Manuel Berkemeier <manuelbb@mail.uni-paderborn.de>"]
+version = "0.1.0"
+
+[deps]
+Accessors = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+CodecZlib = "944b1d66-785c-5afd-91f1-9de20f533193"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+HaltonSequences = "13907d55-377f-55d6-a9d6-25ac19e11b95"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+LoggingExtras = "e6f89c97-d47a-5376-807f-9c37f3926c36"
+Metaheuristics = "bcdb8e00-2c21-11e9-3065-2b553b22f898"
+NLopt = "76087f3c-5699-56af-9a33-bf431cd00edd"
+Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+ProgressBars = "49802e3a-d2f1-5c88-81d8-b72133a6f568"
+ProgressLogging = "33c8b6b6-d38a-422a-b730-caa89a2f386c"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+StructHelpers = "4093c41a-2008-41fd-82b8-e3f9d02b504f"
+Tar = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
+
+[weakdeps]
+Compromise = "254bc946-86ae-484f-a9da-8147cb79ba93"
+
+[extensions]
+CompromiseHelpersExt = "Compromise"

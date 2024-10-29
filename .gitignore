@@ -1,0 +1,13 @@
+_test*
+results
+results/*
+Manifest.toml
+playground
+PROBLEM_LIB
+TESTMO
+DFMO
+*.tar.gz
+*.zip
+private_todo.md
+.vscode
+.direnv
