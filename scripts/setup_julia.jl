@@ -16,7 +16,8 @@ Pkg.develop(; url="https://github.com/manuelbb-upb/Compromise.jl.git")
 Pkg.develop(; path=BENCHMARK_PACKAGE_PATH)
 # Packages for plotting:
 Pkg.add([
-    "GLMakie",
+#    "GLMakie",     # interactive
+    "CairoMakie",   # pdf export
     "LaTeXStrings",
 ])
 # Other helpers:

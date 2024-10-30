@@ -69,7 +69,6 @@ function (cfunc::CountedFunction)(args...; kwargs...)
 end
 # Finally, a helper function to reset the internal counter:
 reset!(cfunc::CountedFunction)=(cfunc.counter[] = 0)
-#%%
 # Now for the actual objective functions.
 
 # We define them as scalar valued functions first, so as to easier get Hessians
@@ -164,6 +163,7 @@ end
 algo_opts = C.AlgorithmOptions(;
     log_level = Logging.Debug,
     stop_delta_min = 1e-9,
+    max_iter = 100,
     nu_accept = 0.01,
     nu_success = 0.9,
     kappa_theta = 1e-4,
@@ -178,10 +178,8 @@ algo_opts = C.AlgorithmOptions(;
     c_delta = 0.99,
     c_mu = 100,
     mu = 0.01,
-    stop_xtol_rel = eps(Float64) * 100,
     trial_mode = Val(:max_diff),
-    #trial_mode = Val(:max_rho),
-    trial_update = Val(:stepsize),
+    trial_update = Val(:classic),
     step_config = C.SteepestDescentConfig(;
         backtracking_mode = Val(:max),
         rhs_factor = 1e-4,
@@ -227,7 +225,7 @@ for (model_key, cfg) in pairs(experiment_configs)
     @reset algo_opts.nu_success = nu_success
     
     ## initialize a 2D optimization problem
-    mop = prepare_mop(model_cfg, :ineq)
+    local mop = prepare_mop(model_cfg, :ineq)
    
     ## initialize empty callback
     user_callback = InfoGatheringCallback()
@@ -260,20 +258,11 @@ end
 set_theme!(CUSTOM_THEME)
 
 # Initialize the figure:
-fig = Figure(; size=(483, 310), figure_padding=2f0)
-
+fig = Figure(; size=(483, 260), figure_padding=5f0)
 # Add title labels:
 Label(
     fig[1, 1:2],
-    rich(
-        "Trajectories with thresholds ", 
-        rich("ν", subscript("(1)"), " = $(nu_success_a)"; color=:black),
-        " and ",
-        rich("ν", subscript("(1)"), " = $(nu_success_b)"; color=:red),
-        "."
-        ;
-        font = :bold
-    );
+    rich("Trajectories with Different Surrogates"; font = :bold);
     fontsize = 12f0
 )
 Label(
@@ -282,11 +271,14 @@ Label(
 )
 
 ax = Axis(
-    fig[3, 1];
+    fig[3:4, 1];
     ##aspect = DataAspect(),
     autolimitaspect = 1,
     xlabel = L"x_1",
     ylabel = L"x_2",
+    xlabelpadding = 2f0,
+    ylabelpadding = 2f0,
+    valign = :top,
 )
 
 # Plot infeasible set:
@@ -332,32 +324,50 @@ plot_props = Dict(
 
 # For padding in mono-spaced labels, compute the number of digits for all 
 # relevant data points:
-_result_numbers = res_dict -> (
-    res_dict["num_its"], res_dict["nc_primal"], res_dict["nc_diff"], res_dict["nc_hess"])
-label_padding = zeros(Int, 4)
+    
+function label_padding!(label_padding_vec, nums)
+    @assert length(label_padding_vec) == length(nums)
+    label_padding_vec .= max.(label_padding_vec, ndigits.(nums))
+    return label_padding_vec
+end
+
+num_keys_1 = ("num_its", "nc_primal", "nc_diff", "nc_hess")
+label_padding_1 = zeros(Int, 4)
 for res_dict in values(results)
-    global label_padding
-    label_padding = max.(label_padding, ndigits.(_result_numbers(res_dict)))
-end 
+    nums = get.(Ref(res_dict), num_keys_1, 1)
+    label_padding!(label_padding_1, nums)
+end
+
+function num_label(res_dict, num_keys, label_padding; 
+    label_prefix = "", 
+    spacing = isempty(label_prefix) ? "" : " "
+)
+    label_arg = label_prefix
+    if length(num_keys) > 0
+        label_arg *= spacing * "("
+    end
+    needs_comma = false
+    for (nk, np) in zip(num_keys, label_padding)
+        if needs_comma
+            label_arg *= ","
+        else
+            needs_comma = true
+        end
+        label_arg *= "$(lpad(get(res_dict, nk, NaN), np, " "))"
+    end
+    if length(num_keys) > 0
+        label_arg *= ")"
+    end
+    return rich(label_arg; font="Latin Modern Mono Light")
+end
+
 
 # Loop through results and make trajetory plots:
 for (model_key, res_dict) in pairs(results)
-    global label_padding
+    global label_padding_1, num_keys_1
     model_props = plot_props[model_key]
-    
-    @unpack label_prefix, color, marker = model_props
-    num_its, nc_primal, nc_diff, nc_hess = _result_numbers(res_dict)
-    label = label_prefix * 
-        "($(num_its), $(nc_primal), $(nc_diff), $(nc_hess))"
-    
-    label = rich(
-        label_prefix, 
-        " ($(lpad("$(num_its)", label_padding[1], " "))",
-        ",$(lpad("$(nc_primal)", label_padding[2], " "))",
-        ",$(lpad("$(nc_diff)", label_padding[3], " "))",
-        ",$(lpad("$(nc_hess)", label_padding[4], " ")))",
-        font="Latin Modern Mono Light"
-    )
+    @unpack label_prefix, color, marker = model_props 
+    label = num_label(res_dict, num_keys_1, label_padding_1; label_prefix) 
 
     strokecolor = endswith(model_key, "a") ? :black : :red
     scatterlines!(
@@ -374,15 +384,32 @@ end
 # Make legend:
 Legend(
     fig[3, 2], ax; 
-    framevisible = true, 
+    framevisible = true,
+    valign = :top 
+)
+Legend(
+    fig[4, 2],
+    [ 
+        MarkerElement(color=:white, strokewidth = 1f0, strokecolor=:black, marker=:cross),
+        MarkerElement(color=:white, strokewidth = 1f0, strokecolor=:red, marker=:cross),
+    ],
+    [
+        rich("ν", subscript("(1)"), " = $(nu_success_a)"; color=:black),
+        rich("ν", subscript("(1)"), " = $(nu_success_b)"; color=:red),
+    ],
+    "thresholds",
+    ;
+    framevisible = true,
+    valign = :bottom,
+    titlegap = 3f0
 )
 # Tinker with layout:
-rowgap!(fig.layout, 10f0)
+rowgap!(fig.layout, 5f0)
 colgap!(fig.layout, 10f0)
 
 # Save the plot:
 save(
-    ensure_path(joinpath(PLOTS_PATH, "two_paraboloids_ineq.png")), fig; 
+    ensure_path(joinpath(PLOTS_PATH, "two_paraboloids_ineq.pdf")), fig; 
     pt_per_unit=1, px_per_unit=5
 )
 fig
@@ -441,25 +468,24 @@ end
 #%%#src
 # #### Plot Figure 2
 # Set up figure …
-fig2 = Figure(; size = (483, 320))
+fig2 = Figure(; size = (483, 250), figure_padding = 5f0)
 # … and sub-layouts for tricky placing:
 top_layout = GridLayout()
 bottom_layout = GridLayout()
 
 # Axis and title:
-ax1 = bottom_layout[1, 1] = Axis(
+ax1 = bottom_layout[1:2, 1] = Axis(
     fig2;
-    limits=((-1.75, 2.75), nothing),
-    xticks = -2:1:3,
-    yticks = -1:1:1,
     autolimitaspect=1f0,
     xlabel = L"x_1",
     ylabel = L"x_2",
+    xlabelpadding = 2f0,
+    ylabelpadding = 2f0
 )
 
 top_layout[1, 1:2] = Label(
     fig2,
-    rich("Trajectories with Cubic Kernel."; font=:bold);
+    rich("Trajectories with Cubic Kernel"; font=:bold);
     fontsize=12f0
 )
 
@@ -473,7 +499,8 @@ lines!(
 )
 plot_unit_arcs!(ax1, 0, π; single_label="Pareto Set")
 
-# Plot iterations
+# Plot Iterations...
+## helper function:
 function plot_rbf_trajectory!(ax, cback; kwargs...)
     x = reduce(hcat, cback.x)
     ## make markers dependent on iteration type
@@ -497,31 +524,46 @@ function plot_rbf_trajectory!(ax, cback; kwargs...)
     s = scatter!(ax, x; marker, markersize)
     return l, s
 end
+## actual plotting
+num_keys_2 = (:num_its, :nc_objf, :nc_constr)
+label_padding_2 = zeros(Int, 3)
+for res_tup in results_cubics
+    nums = get.(Ref(res_tup), num_keys_2, 1)
+    label_padding!(label_padding_2, nums)
+end
+legend_elems = Any[]
+legend_labels_1 = Any[]
 for (i, res) in enumerate(results_cubics)
+    global num_keys_2, label_padding_2
+    global legend_elems, legend_labels_1, legend_labels_2
     label = rich(
         rich("Δ", subscript("(0)"), " = $(res.cfg.delta_init), "),
         rich(
             rich("c"; font="Latin Modern Mono Light"), 
                 subscript("Δ"), " = $(res.cfg.c_delta)")
-    )
+    )   
     color = Makie.wong_colors()[i]
     plot_rbf_trajectory!(ax1, res.cback; label, color)
     xfin = Point2(C.opt_vars(res.ret)...)
-    text!(
-        ax1, xfin; 
-        text = "($(res.num_its), $(res.nc_objf), $(res.nc_constr))",
-        color,
-        align = xfin[1] < 0 ? (:left, :center) : (:right, :center),
-        offset = xfin[1] < 0 ? (8f0, 0f0) : (-8f0, 0f0),
-        fontsize = 12f0
-    )
+
+    push!(legend_elems, LineElement(; color))
+    push!(legend_labels_1, num_label(res, num_keys_2, label_padding_2))
 end
+
 # Legend for trajectories:
-axislegend(; 
-    ax1, position = :rb
+bottom_layout[1,2] = Legend(
+    fig2, ax1;
+    valign = :top,
 )
 
-# Manual Legend
+# Manual legend bottom
+bottom_layout[2,2] = Legend(
+    fig2, 
+    legend_elems,
+    legend_labels_1
+)
+
+# Manual Legend Top
 top_layout[2,1] = Legend(
     fig2,
     [
@@ -539,6 +581,7 @@ top_layout[2,1] = Legend(
     patchsize = (5f0, 10f0),
     halign = :left
 )
+
 top_layout[2,2] = Label(
     fig2,
     "(№ iterations, № objective calls, № constraint calls)";
@@ -549,13 +592,12 @@ top_layout[2,2] = Label(
 fig2.layout[1, 1] = top_layout
 fig2.layout[2, 1] = bottom_layout
 # Tweak sizes:
-colsize!(bottom_layout, 1, Fixed(428))
 rowgap!(top_layout, 5f0)
-rowgap!(fig2.layout, 10f0)
+rowgap!(fig2.layout, 5f0)
 colgap!(top_layout, 0)
 # Save and show:
 save(
-    ensure_path(joinpath(PLOTS_PATH, "two_paraboloids_eq.png")), fig2;
+    ensure_path(joinpath(PLOTS_PATH, "two_paraboloids_eq.pdf")), fig2;
     pt_per_unit=1,
     px_per_unit=5
 )

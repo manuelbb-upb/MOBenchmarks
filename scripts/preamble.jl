@@ -32,9 +32,11 @@ CH = MOB.init_CompromiseHelpers()
 import FiniteDiff as FD
 
 # For plotting, we use (GL)Makie and `LaTeXStrings`:
-using GLMakie
+# using GLMakie
+# import GLMakie: RGB, RGBA
+using CairoMakie
+import CairoMakie: RGB, RGBA
 using LaTeXStrings
-import GLMakie: RGB, RGBA
 
 # With `@unpack` I can be lazy about named tuples:
 import UnPack: @unpack
@@ -83,7 +85,8 @@ CUSTOM_THEME = merge(
         ),
         Legend = (;
             rowgap = 0f0,
-            patchsize = (12f0, 12f0)
+            patchsize = (12f0, 12f0),
+            padding = (3f0, 3f0, 3f0, 3f0)
         )
     ),
 )

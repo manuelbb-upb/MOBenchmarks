@@ -9,8 +9,6 @@ include("info_gathering_callback.jl")
 
 import NLopt
 import HaltonSequences: HaltonPoint
-# Set plotting mode for VSCode:
-Makie.inline!(false)
 
 # ## MW3 Functions
 const sqrt2 = sqrt(2)
@@ -166,12 +164,14 @@ set_theme!(CUSTOM_THEME; Scatter = (; markersize=10f0))
 F1 = LinRange(0.0, 1.0, 200)
 F2 = copy(F1)
 
-fig = Figure(; size = (483, 400))
+fig = Figure(; size = (483, 250), figure_padding=2f0)
 ax = Axis(
     fig[1,1];
     title="Multi-Objective Optimization vs Weighted Sum",
     xlabel=L"f_1",
-    ylabel=L"f_2"
+    ylabel=L"f_2",
+    xlabelpadding=2f0,
+    ylabelpadding=2f0
 )
 # Plot all image space vectors satisfying constraints:
 contourf!(
@@ -214,13 +214,13 @@ plot_trajectories!(ax, Fn; marker = :cross, linestyle=:dash)
 
 # Hack a legend
 lines!(ax, zeros(2,0); color=(:black, .4), label="feasible", linewidth=10f0)
-scatter!(ax, zeros(2,0); marker=:star5, color=:white, label="Compromise std")
-scatter!(ax, zeros(2,0); marker=:rect, color=:white, label="Compromise mod")
+scatter!(ax, zeros(2,0); marker=:star5, color=:white, label="Compromise std.")
+scatter!(ax, zeros(2,0); marker=:rect, color=:white, label="Compromise mod.")
 scatter!(ax, zeros(2,0); marker=:cross, color=:white, label="WS COBYLA")
 
 axislegend(ax; position=(.1, .1))
 save(
-    ensure_path(joinpath(PLOTS_PATH, "mw3_trajectories.png")), fig; 
+    ensure_path(joinpath(PLOTS_PATH, "mw3_trajectories.pdf")), fig; 
     pt_per_unit=1, px_per_unit=5
 )
 
