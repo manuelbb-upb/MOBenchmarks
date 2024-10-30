@@ -62,8 +62,8 @@ function pairwise_combinations(objects)
     return obj_pairs
 end
 # Generate the solver pair arrays:
-const PAIRS_UNCONSTR = pairwise_combinations(SOLVERS_UNCONSTR)
-const PAIRS_CONSTR = pairwise_combinations(SOLVERS_CONSTR)
+PAIRS_UNCONSTR = pairwise_combinations(SOLVERS_UNCONSTR)
+PAIRS_CONSTR = pairwise_combinations(SOLVERS_CONSTR)
 
 # Before computing the performance and generating plots, I define a global property
 # dict to have nicer labels etc.
@@ -112,18 +112,19 @@ function plot_performance_profile(
     title = "",
     ylimits = (-0.05f0, 1.05f0),
     ax_kwargs = (;),
-    legendpos = :rb
+    legendpos = :rb,
+    fig_size = (240, 200),
+    fig_theme = CUSTOM_THEME_SMALL,
 )
     global solver_props
-    global CUSTOM_THEME_SMALL
 
     if isnothing(solver_fpath_cnames)
         DF.metadata(perf_df, "solver_fpath_cnames", String[])
     end
 
-    with_theme(CUSTOM_THEME_SMALL) do
+    with_theme(fig_theme) do
         ## setup figure
-        fig = Figure(; size = (240, 200))
+        fig = Figure(; size = fig_size)
         ax = Axis(
             fig[1,1];
             title,
@@ -151,6 +152,7 @@ function plot_performance_profile(
         axislegend(
             ax; 
             position=legendpos,
+            font="Latin Modern Mono Light"
         )
         fig
     end
@@ -197,17 +199,18 @@ function make_purity_plots(
  
         ## generate Figure title
         _sname = sfpath -> haskey(solver_props, sfpath) ? solver_props[sfpath].name : ""
-        title = "$(title_prefix) – $(_sname(solver_fpath_pair[1])) – $(_sname(solver_fpath_pair[2]))"
+        #src title = "$(title_prefix) – $(_sname(solver_fpath_pair[1])) – $(_sname(solver_fpath_pair[2]))"
+        title = title_prefix
         
         ## determine figure save path from purity dataframe metadata
         fig_fpath = joinpath(
             PLOTS_PATH, 
-            DF.metadata(purity_df, "results_basename") * ".png"
+            DF.metadata(purity_df, "results_basename") * ".pdf"
         )
         @info "Making performance plot at `$fig_fpath`."
         perf_fig = plot_performance_profile(
             perf_df, solver_fpath_pair;
-            title,
+            title, fig_size = (160, 150), fig_theme = CUSTOM_THEME_EXTRA_SMALL
         )
 
         save_fig(fig_fpath, perf_fig)
@@ -216,9 +219,9 @@ end
 
 # Finally, make all the purity plots:
 make_purity_plots(lib_unconstr, PAIRS_UNCONSTR; 
-    suffix = "_unconstr", title_prefix = "Purity (c)")
+    suffix = "_unconstr", title_prefix = "Purity (u)")
 make_purity_plots(lib_constr, PAIRS_CONSTR; 
-    suffix = "_constr", title_prefix = "Purity (u)")
+    suffix = "_constr", title_prefix = "Purity (c)")
 #%%#src
 # ## Hypervolume Performance Indicator
 # 
@@ -257,14 +260,14 @@ fig_hv_uc = plot_performance_profile(
     title = "Inv. Hyperarea Ratio (u)",
     ax_kwargs = (; limits = ((0.9, 9.99), nothing)) # exclude very large values
 )
-save_fig("inv_hyperarea_ratio_unconstr.png", fig_hv_uc)
+save_fig("inv_hyperarea_ratio_unconstr.pdf", fig_hv_uc)
 
 fig_hv_c = plot_performance_profile(
     perf_hv_c, SOLVERS_CONSTR;
     title = "Inv. Hyperarea Ratio (c)",
     ax_kwargs = (; limits = ((0.9, 9.99), nothing)) # exclude very large values
 )
-save_fig("inv_hyperarea_ratio_constr.png", fig_hv_c)
+save_fig("inv_hyperarea_ratio_constr.pdf", fig_hv_c)
 #%%#src
 # ## Spread Performance
 # We can compute different kinds of spread values.
@@ -334,9 +337,9 @@ fig_Xi_uc = plot_performance_profile(perf_Xi_uc, SOLVERS_UNCONSTR;
 fig_Delta_uc = plot_performance_profile(perf_Delta_uc, SOLVERS_UNCONSTR; 
     title="Δ Spread (u)", legendpos=(.9, .01))
 
-save_fig("theta_spread_unconstr.png", fig_Theta_uc)
-save_fig("xi_spread_unconstr.png", fig_Xi_uc)
-save_fig("delta_spread_unconstr.png", fig_Delta_uc)
+save_fig("theta_spread_unconstr.pdf", fig_Theta_uc)
+save_fig("xi_spread_unconstr.pdf", fig_Xi_uc)
+save_fig("delta_spread_unconstr.pdf", fig_Delta_uc)
 
 ## constrained problems
 fig_Theta_c = plot_performance_profile(perf_Theta_c, SOLVERS_CONSTR; 
@@ -346,9 +349,9 @@ fig_Xi_c = plot_performance_profile(perf_Xi_c, SOLVERS_CONSTR;
 fig_Delta_c = plot_performance_profile(perf_Delta_c, SOLVERS_CONSTR; 
     title="Δ Spread (c)", legendpos=:cb)
 
-save_fig("theta_spread_constr.png", fig_Theta_c)
-save_fig("xi_spread_constr.png", fig_Xi_c)
-save_fig("delta_spread_constr.png", fig_Delta_c)
+save_fig("theta_spread_constr.pdf", fig_Theta_c)
+save_fig("xi_spread_constr.pdf", fig_Xi_c)
+save_fig("delta_spread_constr.pdf", fig_Delta_c)
 
 #%%#src
 # ## Constraint Violation
@@ -366,7 +369,19 @@ fig_mv_c = plot_performance_profile(perf_mv_c, SOLVERS_CONSTR;
     title="Constraint Violation — Median"
 )
 
-save_fig("median_constr_viol.png", fig_mv_c)
+save_fig("median_constr_viol.pdf", fig_mv_c)
+
+# Now do the same for the third quartile
+qv_c = MOB.quantile_viol(lib_constr, SOLVERS_CONSTR; 
+    quantile_val=.75,
+)
+perf_qv_c = MOB.performance_profile(qv_c, SOLVERS_CONSTR)
+
+fig_qv_c = plot_performance_profile(perf_qv_c, SOLVERS_CONSTR;
+    title="Constr. Viol. — 3rd Quartile"
+)
+
+save_fig("q3_constr_viol.pdf", fig_qv_c)
 # ## References
 # [^1]: A. L. Custódio, J. F. A. Madeira, A. I. F. Vaz, and L. N. Vicente,
 #       “Direct Multisearch for Multiobjective Optimization,” 

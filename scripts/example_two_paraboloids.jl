@@ -258,16 +258,16 @@ end
 set_theme!(CUSTOM_THEME)
 
 # Initialize the figure:
-fig = Figure(; size=(483, 260), figure_padding=5f0)
+fig = Figure(; size=(480, 260), figure_padding=5f0)
 # Add title labels:
 Label(
     fig[1, 1:2],
-    rich("Trajectories with Different Surrogates"; font = :bold);
-    fontsize = 12f0
+    "Trajectories with Different Surrogates";
 )
 Label(
     fig[2, 1:2],
     "(№ iterations, № function calls, № gradient calls, № Hessian calls)";
+    font = :regular,
 )
 
 ax = Axis(
@@ -358,9 +358,8 @@ function num_label(res_dict, num_keys, label_padding;
     if length(num_keys) > 0
         label_arg *= ")"
     end
-    return rich(label_arg; font="Latin Modern Mono Light", fontsize=9f0)
+    return rich(label_arg; font="Latin Modern Mono Light")
 end
-
 
 # Loop through results and make trajetory plots:
 for (model_key, res_dict) in pairs(results)
@@ -468,7 +467,7 @@ end
 #%%#src
 # #### Plot Figure 2
 # Set up figure …
-fig2 = Figure(; size = (483, 250), figure_padding = 5f0)
+fig2 = Figure(; size = (480, 250), figure_padding = 5f0)
 # … and sub-layouts for tricky placing:
 top_layout = GridLayout()
 bottom_layout = GridLayout()
@@ -485,8 +484,7 @@ ax1 = bottom_layout[1:2, 1] = Axis(
 
 top_layout[1, 1:2] = Label(
     fig2,
-    rich("Trajectories with Cubic Kernel"; font=:bold);
-    fontsize=12f0
+    "Trajectories with Cubic Kernel";
 )
 
 # Plot Pareto-Set:
@@ -539,7 +537,7 @@ for (i, res) in enumerate(results_cubics)
     label = rich(
         rich("Δ", subscript("(0)"), " = $(res.cfg.delta_init), "),
         rich(
-            rich("c"; font="Latin Modern Mono Light", fontsize=9f0), 
+            rich("c"; font="Latin Modern Mono Light"), 
                 subscript("Δ"), " = $(res.cfg.c_delta)")
     )   
     color = Makie.wong_colors()[i]
@@ -572,19 +570,21 @@ top_layout[2,1] = Legend(
         MarkerElement(color=:black, marker=:circle),
     ],
     [
-        L"$θ$-Step",
+        L"$θ$–Step",
         "Restoration",
         "Other"
     ];
     orientation = :horizontal,
     padding = (3f0, 3f0, 3f0, 3f0),
-    patchsize = (5f0, 10f0),
-    halign = :left
+    patchsize = (5f0, 6f0),
+    colgap = 8f0,
+    halign = :left,
 )
 
 top_layout[2,2] = Label(
     fig2,
     "(№ iterations, № objective calls, № constraint calls)";
+    font=:regular,
     halign = :left
 )
 

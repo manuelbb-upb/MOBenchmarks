@@ -65,11 +65,18 @@ WONG_COLORS = Makie.wong_colors()
 CUSTOM_THEME = merge(
     theme_latexfonts(),
     Theme(;
+        figure_padding = 2f0,
         fontsize = 10f0,        ## base fontsize; most attributes inherit this
         Axis = (;
-            titlesize = 12f0,
-            xlabelsize = 12f0,
-            ylabelsize = 12f0,
+            titlesize = 11f0,
+            xlabelsize = 11f0,
+            ylabelsize = 11f0,
+            titlefont = "Latin Modern Sans, Bold",
+            subtitlefont = "Latin Modern Sans"
+        ),
+        Label = (;
+            font = "Latin Modern Sans, Bold",
+            fontsize = 11f0,
         ),
         Lines = (;
             linewidth = 1.5f0,
@@ -84,6 +91,7 @@ CUSTOM_THEME = merge(
             strokewidth = .75f0,
         ),
         Legend = (;
+            titlefont = "Latin Modern Sans, Bold",
             rowgap = 0f0,
             patchsize = (12f0, 12f0),
             padding = (3f0, 3f0, 3f0, 3f0)
@@ -96,6 +104,10 @@ CUSTOM_THEME_SMALL = merge(
         Axis = (;
             xlabelpadding = 1f0,
             ylabelpadding = 1f0,
+            titlesize=10f0,
+        ),
+        Label = (;
+            fontsize=10f0,
         ),
         Lines = (;
             linewidth = 1f0,
@@ -111,6 +123,33 @@ CUSTOM_THEME_SMALL = merge(
         ),
         Legend = (;
             padding = (1f0, 1f0, 1f0, 1f0)
+        )
+    ),
+)
+
+CUSTOM_THEME_EXTRA_SMALL = merge(
+    CUSTOM_THEME_SMALL,
+    Theme(;
+        Axis = (;
+            xlabelpadding=.5f0,
+            ylabelpadding=.5f0,
+            titlesize = 9f0,
+        ),
+        Lines = (;
+            linewidth = .5f0,
+        ),
+        Scatter = (;
+            markersize = 1f0,
+            strokewidth = .125f0,
+        ),
+        ScatterLines = (;
+            linewidth = .5f0,
+            markersize = 1f0,
+            strokewidth = .125f0,
+        ),
+        Legend = (;
+            padding = (1f0, 1f0, 1f0, 1f0),
+            fontsize = 6f0
         )
     ),
 )

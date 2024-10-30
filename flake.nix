@@ -28,6 +28,9 @@
                 julia-fhs
                 pkgs.gfortran      
             ];
+            shellHook = ''
+                export FREETYPE_ABSTRACTION_FONT_PATH="/run/current-system/sw/share/X11/fonts"
+            '';
         };
     };
 }

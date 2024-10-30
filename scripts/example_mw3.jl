@@ -164,7 +164,7 @@ set_theme!(CUSTOM_THEME; Scatter = (; markersize=10f0))
 F1 = LinRange(0.0, 1.0, 200)
 F2 = copy(F1)
 
-fig = Figure(; size = (483, 250), figure_padding=2f0)
+fig = Figure(; size = (480, 250), figure_padding=2f0)
 ax = Axis(
     fig[1,1];
     title="Multi-Objective Optimization vs Weighted Sum",
@@ -216,13 +216,13 @@ plot_trajectories!(ax, Fn; marker = :cross, linestyle=:dash)
 font = "Latin Modern Mono Light"
 lines!(ax, zeros(2,0); color=(:black, .4), label="feasible", linewidth=10f0)
 scatter!(ax, zeros(2,0);
-    marker=:star5, color=:white, label=rich("Compromise std."; font, fontsize=9f0))
+    marker=:star5, color=:white, label=rich("Compromise std."; font))
 scatter!(ax, zeros(2,0);
-    marker=:rect, color=:white, label=rich("Compromise mod."; font, fontsize=9f0))
+    marker=:rect, color=:white, label=rich("Compromise mod."; font))
 scatter!(ax, zeros(2,0); 
-    marker=:cross, color=:white, label=rich("WS COBYLA"; font, fontsize=9f0))
+    marker=:cross, color=:white, label=rich("WS COBYLA"; font))
 
-axislegend(ax; position=(.1, .1), fontsize=10f0)
+axislegend(ax; position=(.1, .1))
 save(
     ensure_path(joinpath(PLOTS_PATH, "mw3_trajectories.pdf")), fig; 
     pt_per_unit=1, px_per_unit=5

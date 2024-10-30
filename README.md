@@ -55,3 +55,5 @@ Or `include` within a `let` scope.
 In an attempt to declutter my global environment, I have tried out the devcontainer feature of VSCode.
 For various reasons, it did not work out for me, but I have kept the `.devcontainer` folder.
 Instead, I now rely on `flake.nix` to have a more isolated and reproducible environment.
+It is not fully independent of the system configuration.
+At the moment I still need Latin Modern Mono fonts in `/run/current-system/sw/share/X11/fonts`.
