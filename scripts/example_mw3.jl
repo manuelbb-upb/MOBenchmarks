@@ -213,12 +213,16 @@ plot_trajectories!(ax, Fc_; marker = :rect)
 plot_trajectories!(ax, Fn; marker = :cross, linestyle=:dash)
 
 # Hack a legend
+font = "Latin Modern Mono Light"
 lines!(ax, zeros(2,0); color=(:black, .4), label="feasible", linewidth=10f0)
-scatter!(ax, zeros(2,0); marker=:star5, color=:white, label="Compromise std.")
-scatter!(ax, zeros(2,0); marker=:rect, color=:white, label="Compromise mod.")
-scatter!(ax, zeros(2,0); marker=:cross, color=:white, label="WS COBYLA")
+scatter!(ax, zeros(2,0);
+    marker=:star5, color=:white, label=rich("Compromise std."; font, fontsize=9f0))
+scatter!(ax, zeros(2,0);
+    marker=:rect, color=:white, label=rich("Compromise mod."; font, fontsize=9f0))
+scatter!(ax, zeros(2,0); 
+    marker=:cross, color=:white, label=rich("WS COBYLA"; font, fontsize=9f0))
 
-axislegend(ax; position=(.1, .1))
+axislegend(ax; position=(.1, .1), fontsize=10f0)
 save(
     ensure_path(joinpath(PLOTS_PATH, "mw3_trajectories.pdf")), fig; 
     pt_per_unit=1, px_per_unit=5

@@ -358,7 +358,7 @@ function num_label(res_dict, num_keys, label_padding;
     if length(num_keys) > 0
         label_arg *= ")"
     end
-    return rich(label_arg; font="Latin Modern Mono Light")
+    return rich(label_arg; font="Latin Modern Mono Light", fontsize=9f0)
 end
 
 
@@ -539,7 +539,7 @@ for (i, res) in enumerate(results_cubics)
     label = rich(
         rich("Δ", subscript("(0)"), " = $(res.cfg.delta_init), "),
         rich(
-            rich("c"; font="Latin Modern Mono Light"), 
+            rich("c"; font="Latin Modern Mono Light", fontsize=9f0), 
                 subscript("Δ"), " = $(res.cfg.c_delta)")
     )   
     color = Makie.wong_colors()[i]
