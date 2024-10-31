@@ -160,6 +160,18 @@ function l1_penalized_objectives(ev::ProblemEvaluator; eps=0.1)
     end
 end
 
+function _eps_term(cx, eps)
+    pen = 0
+    for (i,ci) in enumerate(cx)
+        ci <= 0 && continue
+        pen += (ci / _penalty_eps(eps, i))
+    end
+    return pen
+end
+
+_penalty_eps(eps::Number, i)=eps
+_penalty_eps(eps::AbstractVector, i) = eps[i]
+
 # f(x) + eps * sum( max.(0, c(x)).^(1/gamma) )
 function lu_penalized_objectives(ev::ProblemEvaluator; eps=0.01, gamma=2)
     @assert gamma > 1
@@ -176,14 +188,3 @@ function lu_penalized_objectives(ev::ProblemEvaluator; eps=0.01, gamma=2)
     end
 end
 
-function _eps_term(cx, eps)
-    pen = 0
-    for (i,ci) in enumerate(cx)
-        ci < 0 && continue
-        pen += _penalty_eps(eps, i) * ci
-    end
-    return pen
-end
-
-_penalty_eps(eps::Number, i)=eps
-_penalty_eps(eps::AbstractVector, i) = eps[i]
