@@ -1,36 +1,40 @@
 {
-    inputs = {
-        nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-        scientific-fhs = {
-            url = "github:manuelbb-upb/scientific-fhs/flake_module";
-            inputs.nixpkgs.follows = "nixpkgs";
-        };
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    scientific-nix-pkgs = {
+      url = "github:manuelbb-upb/scientific-nix-pkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
-    
-    outputs = inputs@{self, nixpkgs, scientific-fhs, ...}:
-        let
-            system = "x86_64-linux";
-            pkgs = nixpkgs.legacyPackages.${system}.pkgs;
-            julia-fhs = pkgs.callPackage scientific-fhs.fhsModule {
-                enableJulia = true;
-                enableConda = false;
-                enableQuarto = false;
-                enableNVIDIA = false;
-                enableNode = false;
-                juliaVersion = "1.10.4";
-                commandScript = "julia";
-                commandName = "julia";
-            };
-        in
-        {
-        devShells.${system}.default = pkgs.mkShell {
-            buildInputs = [
-                julia-fhs
-                pkgs.gfortran      
-            ];
-            shellHook = ''
-                export FREETYPE_ABSTRACTION_FONT_PATH="/run/current-system/sw/share/X11/fonts"
-            '';
-        };
+
+  };
+
+  outputs = { 
+    self, 
+    nixpkgs, 
+    scientific-nix-pkgs,
+  }@inputs: 
+  let
+    system = "x86_64-linux"; 
+    pkgs = nixpkgs.legacyPackages.${system}; 
+    spkgs = scientific-nix-pkgs.packages.${system};
+
+    julia = spkgs.julia-ld.override {
+      version = "1.11.4";
+      enable-matlab = false;
     };
+
+  in
+  {
+    devShells.${system}.default = pkgs.mkShell {
+      shellHook = ''
+        export JULIA_NUM_THREADS=12
+      '';
+      packages = [
+        julia
+      ] ++ (with pkgs; [
+        gfortran
+      ]);
+    };
+  }; 
 }

@@ -331,11 +331,11 @@ perf_Delta_c = MOB.performance_profile(Delta_df_c, SOLVERS_CONSTR)
 # Finally, make and save the plots:
 ## unconstrained problems
 fig_Theta_uc = plot_performance_profile(perf_Theta_uc, SOLVERS_UNCONSTR; 
-    title="Θ Spread (u)", legendpos=(.9, .01))
-fig_Xi_uc = plot_performance_profile(perf_Xi_uc, SOLVERS_UNCONSTR; 
-    title="Ξ Spread (u)", legendpos=(.01, .4))
-fig_Delta_uc = plot_performance_profile(perf_Delta_uc, SOLVERS_UNCONSTR; 
     title="Δ Spread (u)", legendpos=(.9, .01))
+fig_Xi_uc = plot_performance_profile(perf_Xi_uc, SOLVERS_UNCONSTR; 
+    title="Γ Spread (u)", legendpos=(.01, .4))
+fig_Delta_uc = plot_performance_profile(perf_Delta_uc, SOLVERS_UNCONSTR; 
+    title="gΔ Spread (u)", legendpos=(.9, .01))
 
 save_fig("theta_spread_unconstr.pdf", fig_Theta_uc)
 save_fig("xi_spread_unconstr.pdf", fig_Xi_uc)
@@ -343,11 +343,11 @@ save_fig("delta_spread_unconstr.pdf", fig_Delta_uc)
 
 ## constrained problems
 fig_Theta_c = plot_performance_profile(perf_Theta_c, SOLVERS_CONSTR; 
-    title="Θ Spread (c)", legendpos=:cb)
-fig_Xi_c = plot_performance_profile(perf_Xi_c, SOLVERS_CONSTR; 
-    title="Ξ Spread (c)", legendpos=:cb)
-fig_Delta_c = plot_performance_profile(perf_Delta_c, SOLVERS_CONSTR; 
     title="Δ Spread (c)", legendpos=:cb)
+fig_Xi_c = plot_performance_profile(perf_Xi_c, SOLVERS_CONSTR; 
+    title="Γ Spread (c)", legendpos=:cb)
+fig_Delta_c = plot_performance_profile(perf_Delta_c, SOLVERS_CONSTR; 
+    title="gΔ Spread (c)", legendpos=:cb)
 
 save_fig("theta_spread_constr.pdf", fig_Theta_c)
 save_fig("xi_spread_constr.pdf", fig_Xi_c)
